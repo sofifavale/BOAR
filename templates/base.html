@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}BOAR{% endblock %}
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+    <!-- ================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================= -->
+
+    <header class="header">
+
+        <div class="header-container">
+
+            <a href="{{ url_for('index') }}"
+               class="logo">
+                BOAR
+            </a>
+
+            <span class="header-subtitle">
+                Gestión de Incidencias
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================================= -->
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <!-- ================================= -->
+
+    {% if usuario_actual %}
+
+    <nav class="navbar">
+
+        <div class="nav-container">
+
+            <a href="{{ url_for('dashboard') }}">
+                Inicio
+            </a>
+
+            {% if usuario_actual.rol == "RESIDENTE" %}
+
+            <a href="{{ url_for('nueva_incidencia') }}">
+                Nueva incidencia
+            </a>
+
+            {% endif %}
+
+            <a href="{{ url_for('notificaciones') }}">
+                Notificaciones
+            </a>
+
+            <div class="nav-user">
+
+                <span>
+                    {{ usuario_actual.nombre }}
+                    {{ usuario_actual.apellido }}
+                </span>
+
+                <span class="user-role">
+                    {{ usuario_actual.rol }}
+                </span>
+
+                <!-- FORMULARIO DE CIERRE DE SESIÓN -->
+
+                <form action="{{ url_for('logout') }}"
+                      method="POST">
+
+                    <!-- PROTECCIÓN CSRF -->
+                    <input type="hidden"
+                           name="csrf_token"
+                           value="{{ csrf_token() }}">
+
+                    <button type="submit"
+                            class="btn-logout">
+                        Cerrar sesión
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    {% endif %}
+
+
+    <!-- ================================= -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ================================= -->
+
+    <main class="main-container">
+
+        <!-- MENSAJES DEL SISTEMA -->
+
+        {% with mensajes = get_flashed_messages(
+            with_categories=true
+        ) %}
+
+            {% if mensajes %}
+
+                <div class="flash-container">
+
+                    {% for categoria, mensaje in mensajes %}
+
+                        <div class="alert alert-{{ categoria }}">
+
+                            {{ mensaje }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- CONTENIDO DE CADA PÁGINA -->
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+    <!-- ================================= -->
+    <!-- PIE DE PÁGINA -->
+    <!-- ================================= -->
+
+    <footer class="footer">
+
+        <p>
+            BOAR - Sistema de Registro y Gestión
+            de Incidencias
+        </p>
+
+        <p>
+            Proyecto académico - Ingeniería en Sistemas
+        </p>
+
+        <p>
+            © 2026 BOAR
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

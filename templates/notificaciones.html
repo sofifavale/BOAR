@@ -1,0 +1,234 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Notificaciones - BOAR
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ===================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <h1>Mis notificaciones</h1>
+
+        <p>
+            Consultá las novedades y actualizaciones
+            relacionadas con las incidencias.
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Volver al panel
+    </a>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- RESUMEN DE NOTIFICACIONES -->
+<!-- ===================================== -->
+
+<div class="stats-container">
+
+    <div class="stat-card">
+
+        <h3>Total de notificaciones</h3>
+
+        <p class="stat-number">
+            {{ notificaciones | length }}
+        </p>
+
+    </div>
+
+    <div class="stat-card">
+
+        <h3>Sin leer</h3>
+
+        <p class="stat-number">
+
+            {{ notificaciones
+                | selectattr("leida", "equalto", false)
+                | list
+                | length
+            }}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- LISTADO DE NOTIFICACIONES -->
+<!-- ===================================== -->
+
+<div class="detail-card">
+
+    <h2>Centro de notificaciones</h2>
+
+    {% if notificaciones %}
+
+        <div class="notifications-list">
+
+            {% for notificacion in notificaciones %}
+
+            <div class="notification-card
+                {% if not notificacion.leida %}
+                    notification-unread
+                {% endif %}
+            ">
+
+                <div class="notification-content">
+
+                    <!-- ESTADO -->
+
+                    <div class="notification-status">
+
+                        {% if notificacion.leida %}
+
+                            <span class="badge badge-leida">
+                                Leída
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge badge-no-leida">
+                                Nueva
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- MENSAJE -->
+
+                    <p class="notification-message">
+
+                        {{ notificacion.mensaje }}
+
+                    </p>
+
+
+                    <!-- FECHA -->
+
+                    <small class="notification-date">
+
+                        {{ notificacion.fecha_hora.strftime(
+                            "%d/%m/%Y %H:%M"
+                        ) }}
+
+                    </small>
+
+
+                    <!-- INCIDENCIA RELACIONADA -->
+
+                    {% if notificacion.incidencia_id %}
+
+                    <p class="notification-reference">
+
+                        Incidencia relacionada:
+                        #{{ notificacion.incidencia_id }}
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- ACCIONES -->
+
+                <div class="notification-actions">
+
+                    {% if notificacion.incidencia_id %}
+
+                    <a
+                        href="{{ url_for(
+                            'ver_incidencia',
+                            incidencia_id=notificacion.incidencia_id
+                        ) }}"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Ver incidencia
+                    </a>
+
+                    {% endif %}
+
+
+                    {% if not notificacion.leida %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'marcar_notificacion_leida',
+                            notificacion_id=notificacion.id
+                        ) }}"
+                    >
+
+                        <!-- PROTECCIÓN CSRF -->
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-small"
+                        >
+                            Marcar como leída
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <!-- SIN NOTIFICACIONES -->
+
+        <div class="empty-state">
+
+            <h3>No tenés notificaciones</h3>
+
+            <p>
+                Cuando haya novedades sobre tus
+                incidencias, aparecerán aquí.
+            </p>
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="btn btn-primary"
+            >
+                Ir al panel principal
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,375 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Panel principal - BOAR
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ===================================== -->
+<!-- ENCABEZADO DEL DASHBOARD -->
+<!-- ===================================== -->
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>Panel de incidencias</h1>
+
+        <p>
+            Bienvenido/a,
+            {{ usuario_actual.nombre }}
+            {{ usuario_actual.apellido }}
+        </p>
+
+        <p>
+            Rol:
+            <strong>{{ usuario_actual.rol }}</strong>
+        </p>
+
+    </div>
+
+    {% if usuario_actual.rol == "RESIDENTE" %}
+
+    <a
+        href="{{ url_for('nueva_incidencia') }}"
+        class="btn btn-primary"
+    >
+        + Nueva incidencia
+    </a>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- TARJETAS DE ESTADÍSTICAS -->
+<!-- ===================================== -->
+
+<div class="stats-container">
+
+    <div class="stat-card">
+
+        <h3>Total de incidencias</h3>
+
+        <p class="stat-number">
+            {{ incidencias | length }}
+        </p>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <h3>En revisión</h3>
+
+        <p class="stat-number">
+
+            {{ incidencias
+                | selectattr("estado", "equalto", "EN REVISIÓN")
+                | list
+                | length
+            }}
+
+        </p>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <h3>En proceso</h3>
+
+        <p class="stat-number">
+
+            {{ incidencias
+                | selectattr("estado", "equalto", "EN PROCESO")
+                | list
+                | length
+            }}
+
+        </p>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <h3>Resueltas</h3>
+
+        <p class="stat-number">
+
+            {{ incidencias
+                | selectattr("estado", "equalto", "RESUELTA")
+                | list
+                | length
+            }}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- LISTADO DE INCIDENCIAS -->
+<!-- ===================================== -->
+
+<div class="section-header">
+
+    {% if usuario_actual.rol == "ADMINISTRADOR" %}
+
+        <h2>Todas las incidencias</h2>
+
+    {% elif usuario_actual.rol == "OPERATIVO" %}
+
+        <h2>Mis incidencias asignadas</h2>
+
+    {% else %}
+
+        <h2>Mis incidencias registradas</h2>
+
+    {% endif %}
+
+</div>
+
+
+{% if incidencias %}
+
+<div class="table-container">
+
+    <table class="incidencias-table">
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+
+                <th>Descripción</th>
+
+                <th>Categoría</th>
+
+                <th>Ubicación</th>
+
+                <th>Prioridad</th>
+
+                <th>Estado</th>
+
+                <th>Fecha</th>
+
+                <th>Acciones</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for incidencia in incidencias %}
+
+            <tr>
+
+                <!-- ID -->
+
+                <td>
+                    #{{ incidencia.id }}
+                </td>
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <td>
+
+                    {{ incidencia.descripcion[:70] }}
+
+                    {% if incidencia.descripcion | length > 70 %}
+                        ...
+                    {% endif %}
+
+                </td>
+
+
+                <!-- CATEGORÍA -->
+
+                <td>
+                    {{ incidencia.categoria.nombre }}
+                </td>
+
+
+                <!-- UBICACIÓN -->
+
+                <td>
+                    {{ incidencia.ubicacion.nombre }}
+                </td>
+
+
+                <!-- PRIORIDAD -->
+
+                <td>
+
+                    {% if incidencia.prioridad %}
+
+                        <span class="badge badge-prioridad">
+
+                            {{ incidencia.prioridad }}
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            Sin asignar
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+
+                <!-- ESTADO -->
+
+                <td>
+
+                    {% if incidencia.estado == "REGISTRADA" %}
+
+                        <span class="badge badge-registrada">
+                            REGISTRADA
+                        </span>
+
+                    {% elif incidencia.estado == "EN REVISIÓN" %}
+
+                        <span class="badge badge-revision">
+                            EN REVISIÓN
+                        </span>
+
+                    {% elif incidencia.estado == "VALIDADA" %}
+
+                        <span class="badge badge-validada">
+                            VALIDADA
+                        </span>
+
+                    {% elif incidencia.estado == "ASIGNADA" %}
+
+                        <span class="badge badge-asignada">
+                            ASIGNADA
+                        </span>
+
+                    {% elif incidencia.estado == "EN PROCESO" %}
+
+                        <span class="badge badge-proceso">
+                            EN PROCESO
+                        </span>
+
+                    {% elif incidencia.estado == "RESUELTA" %}
+
+                        <span class="badge badge-resuelta">
+                            RESUELTA
+                        </span>
+
+                    {% elif incidencia.estado == "CERRADA" %}
+
+                        <span class="badge badge-cerrada">
+                            CERRADA
+                        </span>
+
+                    {% elif incidencia.estado == "RECHAZADA" %}
+
+                        <span class="badge badge-rechazada">
+                            RECHAZADA
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge">
+                            {{ incidencia.estado }}
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+
+                <!-- FECHA -->
+
+                <td>
+
+                    {{ incidencia.fecha_hora.strftime("%d/%m/%Y") }}
+
+                </td>
+
+
+                <!-- BOTÓN VER DETALLE -->
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'ver_incidencia',
+                            incidencia_id=incidencia.id
+                        ) }}"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Ver detalle
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% else %}
+
+<!-- ===================================== -->
+<!-- MENSAJE SIN INCIDENCIAS -->
+<!-- ===================================== -->
+
+<div class="empty-state">
+
+    <h3>No hay incidencias disponibles</h3>
+
+    {% if usuario_actual.rol == "RESIDENTE" %}
+
+        <p>
+            Todavía no registraste ninguna incidencia.
+        </p>
+
+        <a
+            href="{{ url_for('nueva_incidencia') }}"
+            class="btn btn-primary"
+        >
+            Registrar mi primera incidencia
+        </a>
+
+    {% elif usuario_actual.rol == "OPERATIVO" %}
+
+        <p>
+            Actualmente no tenés incidencias asignadas.
+        </p>
+
+    {% else %}
+
+        <p>
+            Todavía no se registraron incidencias
+            en la urbanización.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}

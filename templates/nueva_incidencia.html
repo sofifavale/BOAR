@@ -1,0 +1,257 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Nueva incidencia - BOAR
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ===================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <h1>Registrar nueva incidencia</h1>
+
+        <p>
+            Completá el formulario para informar
+            un problema dentro de la urbanización.
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Volver al panel
+    </a>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- FORMULARIO -->
+<!-- ===================================== -->
+
+<div class="form-container">
+
+    <div class="form-card">
+
+        <form
+            action="{{ url_for('nueva_incidencia') }}"
+            method="POST"
+            class="incidencia-form"
+        >
+
+            <!-- PROTECCIÓN CSRF -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- UBICACIÓN -->
+
+            <div class="form-group">
+
+                <label for="ubicacion_id">
+                    Ubicación de la incidencia *
+                </label>
+
+                <select
+                    id="ubicacion_id"
+                    name="ubicacion_id"
+                    class="form-control"
+                    required
+                >
+
+                    <option value="">
+                        Seleccioná una ubicación
+                    </option>
+
+                    {% for ubicacion in ubicaciones %}
+
+                    <option value="{{ ubicacion.id }}">
+                        {{ ubicacion.nombre }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small class="form-help">
+                    Indicá dónde se encuentra
+                    el problema.
+                </small>
+
+            </div>
+
+
+            <!-- CATEGORÍA -->
+
+            <div class="form-group">
+
+                <label for="categoria_id">
+                    Categoría de la incidencia *
+                </label>
+
+                <select
+                    id="categoria_id"
+                    name="categoria_id"
+                    class="form-control"
+                    required
+                >
+
+                    <option value="">
+                        Seleccioná una categoría
+                    </option>
+
+                    {% for categoria in categorias %}
+
+                    <option value="{{ categoria.id }}">
+                        {{ categoria.nombre }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small class="form-help">
+                    Elegí la categoría que mejor
+                    describa el problema.
+                </small>
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label for="descripcion">
+                    Descripción del problema *
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    class="form-control"
+                    rows="6"
+                    minlength="10"
+                    maxlength="2000"
+                    placeholder="Describí qué ocurrió, dónde se encuentra el problema y cualquier detalle que pueda ayudar a resolverlo."
+                    required
+                ></textarea>
+
+                <small class="form-help">
+                    Explicá el problema con la
+                    mayor claridad posible.
+                </small>
+
+            </div>
+
+
+            <!-- PRIVACIDAD -->
+
+            <div class="form-group">
+
+                <div class="checkbox-group">
+
+                    <input
+                        type="checkbox"
+                        id="privada"
+                        name="privada"
+                    >
+
+                    <label for="privada">
+                        Marcar como incidencia privada
+                    </label>
+
+                </div>
+
+                <small class="form-help">
+                    Esta opción registra la incidencia
+                    como privada. Su tratamiento
+                    específico dependerá de las reglas
+                    de acceso del sistema.
+                </small>
+
+            </div>
+
+
+            <!-- INFORMACIÓN -->
+
+            <div class="info-box">
+
+                <h3>Información importante</h3>
+
+                <p>
+                    Al registrar la incidencia,
+                    el sistema le asignará
+                    automáticamente:
+                </p>
+
+                <ul>
+
+                    <li>
+                        Un identificador único.
+                    </li>
+
+                    <li>
+                        La fecha y hora del registro.
+                    </li>
+
+                    <li>
+                        El estado inicial REGISTRADA.
+                    </li>
+
+                    <li>
+                        El residente que realizó
+                        el reporte.
+                    </li>
+
+                </ul>
+
+                <p>
+                    La administración será notificada
+                    para iniciar la revisión.
+                </p>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="form-actions">
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="btn btn-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Registrar incidencia
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

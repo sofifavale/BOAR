@@ -1,0 +1,31 @@
+Credenciales de acceso
+
+1. ADMINISTRADOR
+
+Usuario: admin@boar.local
+
+Contraseña: Demo1234!
+
+Rol: Administrador
+
+Función: Gestionar y supervisar las incidencias de la urbanización.
+
+2. RESIDENTE
+
+Usuario: residente@boar.local
+
+Contraseña: Demo1234!
+
+Rol: Residente
+
+Función: Registrar incidencias y consultar su seguimiento.
+
+3. PERSONAL OPERATIVO
+
+Usuario: operativo@boar.local
+
+Contraseña: Demo1234!
+
+Rol: Personal operativo
+
+Función: Consultar y gestionar las incidencias correspondientes a su trabajo.

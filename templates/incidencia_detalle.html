@@ -1,0 +1,658 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Incidencia #{{ incidencia.id }} - BOAR
+{% endblock %}
+
+{% block content %}
+
+<!-- ===================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================== -->
+
+<div class="page-header">
+
+    <div>
+        <h1>Incidencia #{{ incidencia.id }}</h1>
+
+        <p>
+            Detalle y seguimiento de la incidencia
+        </p>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="btn btn-secondary">
+        Volver al panel
+    </a>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- INFORMACIÓN GENERAL -->
+<!-- ===================================== -->
+
+<div class="detail-card">
+
+    <h2>Información general</h2>
+
+    <div class="detail-grid">
+
+        <div class="detail-item">
+            <strong>Estado</strong>
+            <span class="badge">
+                {{ incidencia.estado }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Prioridad</strong>
+            <span>
+                {{ incidencia.prioridad or "Sin asignar" }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Categoría</strong>
+            <span>
+                {{ incidencia.categoria.nombre }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Ubicación</strong>
+            <span>
+                {{ incidencia.ubicacion.nombre }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Fecha de registro</strong>
+            <span>
+                {{ incidencia.fecha_hora.strftime("%d/%m/%Y %H:%M") }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Responsable</strong>
+            <span>
+                {% if incidencia.responsable %}
+                    {{ incidencia.responsable.obtener_nombre_completo() }}
+                {% else %}
+                    Sin asignar
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <strong>Tipo</strong>
+            <span>
+                {% if incidencia.privada %}
+                    Privada
+                {% else %}
+                    General
+                {% endif %}
+            </span>
+        </div>
+
+        {% if usuario_actual.rol == "ADMINISTRADOR" %}
+
+        <div class="detail-item">
+            <strong>Reportada por</strong>
+            <span>
+                {{ incidencia.reportante.obtener_nombre_completo() }}
+            </span>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <h3>Descripción</h3>
+
+    <p class="incidencia-description">
+        {{ incidencia.descripcion }}
+    </p>
+
+    {% if incidencia.motivo_rechazo %}
+
+    <div class="alert alert-danger">
+        <strong>Motivo del rechazo:</strong>
+        {{ incidencia.motivo_rechazo }}
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- ACCIONES DE ADMINISTRACIÓN -->
+<!-- ===================================== -->
+
+{% if usuario_actual.rol == "ADMINISTRADOR" %}
+
+<div class="detail-card">
+
+    <h2>Gestión administrativa</h2>
+
+    <!-- INICIAR REVISIÓN -->
+
+    {% if incidencia.estado == "REGISTRADA" %}
+
+    <form method="POST"
+          action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <input type="hidden"
+               name="accion"
+               value="iniciar_revision">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Iniciar revisión
+        </button>
+
+    </form>
+
+    {% endif %}
+
+
+    <!-- EN REVISIÓN -->
+
+    {% if incidencia.estado == "EN REVISIÓN" %}
+
+    <div class="action-group">
+
+        <h3>Establecer prioridad</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="establecer_prioridad">
+
+            <select name="prioridad"
+                    class="form-control"
+                    required>
+
+                <option value="">
+                    Seleccionar prioridad
+                </option>
+
+                <option value="BAJA">Baja</option>
+                <option value="MEDIA">Media</option>
+                <option value="ALTA">Alta</option>
+                <option value="URGENTE">Urgente</option>
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-secondary">
+                Guardar prioridad
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="action-group">
+
+        <h3>Validar incidencia</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="validar">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Validar incidencia
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="action-group">
+
+        <h3>Rechazar incidencia</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="rechazar">
+
+            <label for="motivo">
+                Motivo del rechazo
+            </label>
+
+            <textarea id="motivo"
+                      name="motivo"
+                      class="form-control"
+                      rows="3"
+                      required></textarea>
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Rechazar incidencia
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- ASIGNAR RESPONSABLE -->
+
+    {% if incidencia.estado == "VALIDADA" %}
+
+    <div class="action-group">
+
+        <h3>Asignar responsable</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="asignar">
+
+            <label for="operativo_id">
+                Personal operativo
+            </label>
+
+            <select id="operativo_id"
+                    name="operativo_id"
+                    class="form-control"
+                    required>
+
+                <option value="">
+                    Seleccionar operario
+                </option>
+
+                {% for operativo in operativos %}
+
+                <option value="{{ operativo.id }}">
+                    {{ operativo.obtener_nombre_completo() }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Asignar incidencia
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="action-group">
+
+        <h3>Modificar prioridad</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="establecer_prioridad">
+
+            <select name="prioridad"
+                    class="form-control"
+                    required>
+
+                <option value="BAJA">Baja</option>
+                <option value="MEDIA">Media</option>
+                <option value="ALTA">Alta</option>
+                <option value="URGENTE">Urgente</option>
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-secondary">
+                Actualizar prioridad
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- RESUELTA -->
+
+    {% if incidencia.estado == "RESUELTA" %}
+
+    <div class="action-group">
+
+        <h3>Incidencia resuelta</h3>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="cerrar">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Cerrar incidencia
+            </button>
+
+        </form>
+
+        <form method="POST"
+              action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="hidden"
+                   name="accion"
+                   value="reabrir">
+
+            <button type="submit"
+                    class="btn btn-secondary">
+                Reabrir incidencia
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- ===================================== -->
+<!-- ACCIONES DEL PERSONAL OPERATIVO -->
+<!-- ===================================== -->
+
+{% if usuario_actual.rol == "OPERATIVO" %}
+
+<div class="detail-card">
+
+    <h2>Gestión del trabajo</h2>
+
+    {% if incidencia.estado == "ASIGNADA" %}
+
+    <form method="POST"
+          action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <input type="hidden"
+               name="accion"
+               value="iniciar_trabajo">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Iniciar trabajo
+        </button>
+
+    </form>
+
+    {% elif incidencia.estado == "EN PROCESO" %}
+
+    <form method="POST"
+          action="{{ url_for('accion_incidencia', incidencia_id=incidencia.id) }}">
+
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <input type="hidden"
+               name="accion"
+               value="resolver">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Marcar como resuelta
+        </button>
+
+    </form>
+
+    {% else %}
+
+    <p>
+        No hay acciones operativas disponibles
+        para el estado actual.
+    </p>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- ===================================== -->
+<!-- HISTORIAL -->
+<!-- ===================================== -->
+
+{% if usuario_actual.rol in ["ADMINISTRADOR", "OPERATIVO"] %}
+
+<div class="detail-card">
+
+    <h2>Historial de la incidencia</h2>
+
+    {% if eventos %}
+
+    <div class="timeline">
+
+        {% for evento in eventos %}
+
+        <div class="timeline-item">
+
+            <strong>
+                {{ evento.accion }}
+            </strong>
+
+            <p>
+                {{ evento.detalle or "" }}
+            </p>
+
+            <small>
+                {{ evento.fecha_hora.strftime("%d/%m/%Y %H:%M") }}
+            </small>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <p>No hay eventos registrados.</p>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- ===================================== -->
+<!-- COMUNICACIONES -->
+<!-- ===================================== -->
+
+<div class="detail-card">
+
+    <h2>Comunicaciones</h2>
+
+    {% if comunicaciones %}
+
+        {% for comunicacion in comunicaciones %}
+
+        <div class="message-card">
+
+            <strong>
+                {{ comunicacion.autor.obtener_nombre_completo() }}
+            </strong>
+
+            <small>
+                {{ comunicacion.fecha_hora.strftime("%d/%m/%Y %H:%M") }}
+            </small>
+
+            <p>
+                {{ comunicacion.mensaje }}
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>
+            Todavía no hay comunicaciones.
+        </p>
+
+    {% endif %}
+
+
+    {% if incidencia.estado not in ["CERRADA", "RECHAZADA"] %}
+
+    <h3>Agregar mensaje</h3>
+
+    <form method="POST"
+          action="{{ url_for('comentar_incidencia', incidencia_id=incidencia.id) }}">
+
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <textarea name="mensaje"
+                  class="form-control"
+                  rows="4"
+                  maxlength="2000"
+                  required
+                  placeholder="Escribí tu mensaje..."></textarea>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Enviar mensaje
+        </button>
+
+    </form>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- NOTAS INTERNAS -->
+<!-- ===================================== -->
+
+{% if usuario_actual.rol in ["ADMINISTRADOR", "OPERATIVO"] %}
+
+<div class="detail-card">
+
+    <h2>Notas internas</h2>
+
+    <p>
+        Estas notas son exclusivas para
+        administración y personal operativo.
+    </p>
+
+    {% if notas %}
+
+        {% for nota in notas %}
+
+        <div class="message-card">
+
+            <p>
+                {{ nota.texto }}
+            </p>
+
+            <small>
+                {{ nota.fecha_hora.strftime("%d/%m/%Y %H:%M") }}
+            </small>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No hay notas internas.</p>
+
+    {% endif %}
+
+
+    <form method="POST"
+          action="{{ url_for('agregar_nota', incidencia_id=incidencia.id) }}">
+
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <textarea name="texto"
+                  class="form-control"
+                  rows="4"
+                  required
+                  placeholder="Escribí una nota interna..."></textarea>
+
+        <button type="submit"
+                class="btn btn-secondary">
+            Guardar nota
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

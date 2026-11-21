@@ -1,0 +1,131 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Iniciar sesión - BOAR
+{% endblock %}
+
+
+{% block content %}
+
+<div class="login-container">
+
+    <div class="login-card">
+
+        <!-- ENCABEZADO DEL LOGIN -->
+
+        <div class="login-header">
+
+            <h1>Bienvenido a BOAR</h1>
+
+            <p>
+                Sistema de Registro y Gestión
+                de Incidencias
+            </p>
+
+            <p>
+                Ingresá tus credenciales
+                para acceder al sistema.
+            </p>
+
+        </div>
+
+
+        <!-- FORMULARIO DE INICIO DE SESIÓN -->
+
+        <form
+            action="{{ url_for('login') }}"
+            method="POST"
+            class="login-form"
+        >
+
+            <!-- PROTECCIÓN CSRF -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- CORREO ELECTRÓNICO -->
+
+            <div class="form-group">
+
+                <label for="email">
+                    Correo electrónico
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="ejemplo@correo.com"
+                    autocomplete="username"
+                    maxlength="180"
+                    required
+                >
+
+            </div>
+
+
+            <!-- CONTRASEÑA -->
+
+            <div class="form-group">
+
+                <label for="password">
+                    Contraseña
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Ingresá tu contraseña"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- BOTÓN DE INGRESO -->
+
+            <div class="form-group">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-block"
+                >
+                    Iniciar sesión
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- INFORMACIÓN ADICIONAL -->
+
+        <div class="login-footer">
+
+            <p>
+                El acceso está reservado
+                a usuarios autorizados
+                de la urbanización.
+            </p>
+
+            <p>
+                Si no tenés una cuenta,
+                contactá con administración.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
